@@ -6,20 +6,14 @@ import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useSocket } from '../contexts/SocketContext';
 
-export const Welcome = () => {
+export const Home = () => {
     const [userName, setUserName] = useState('');
     const [roomId, setRoomId] = useState('');
-    const { joinRoom, createRoom, isConnected } = useSocket();
+    const { joinRoom, isConnected } = useSocket();
 
     const handleJoinRoom = () => {
         if (userName.trim() && roomId.trim()) {
             joinRoom(roomId.trim(), userName.trim());
-        }
-    };
-
-    const handleCreateRoom = () => {
-        if (userName.trim()) {
-            createRoom(userName.trim());
         }
     };
 
@@ -74,22 +68,10 @@ export const Welcome = () => {
                         </TabsContent>
 
                         <TabsContent value="create" className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="create-name">Your Name</Label>
-                                <Input
-                                    id="create-name"
-                                    placeholder="Enter your name"
-                                    value={userName}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
-                                />
+                            <div className="space-y-2 flex flex-col items-center p-10">
+                                <Label htmlFor="create-name" className='align-center'>Go To Admin to Create Quiz</Label>
+                    
                             </div>
-                            <Button
-                                onClick={handleCreateRoom}
-                                className="w-full"
-                                disabled={!userName.trim() || !isConnected}
-                            >
-                                Create Quiz Room
-                            </Button>
                         </TabsContent>
                     </Tabs>
                 </CardContent>

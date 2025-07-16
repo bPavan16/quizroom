@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { SocketProvider, useSocket } from './contexts/SocketContext';
-import { Welcome } from './components/Welcome';
+import { Home } from './components/Home';
 import { Quiz } from './components/Quiz';
 import { Admin } from './components/Admin';
 import { Button } from './components/ui/button';
 import './App.css';
 
 function AppContent() {
-  const { quizState, userId, currentRoomId } = useSocket();
+  const { userId, currentRoomId } = useSocket();
   const [isAdminMode, setIsAdminMode] = useState(false);
 
-  // Admin mode
+  // Admin mode to crreate quizzes and problems
   if (isAdminMode) {
     return (
       <div>
@@ -44,7 +44,7 @@ function AppContent() {
     );
   }
 
-  // Show welcome screen
+  // Show Home screen
   return (
     <div>
       <div className="fixed top-4 right-4 z-50">
@@ -55,7 +55,7 @@ function AppContent() {
           Admin Mode
         </Button>
       </div>
-      <Welcome />
+      <Home />
     </div>
   );
 }
