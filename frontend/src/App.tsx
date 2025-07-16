@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import { SocketProvider, useSocket } from './contexts/SocketContext';
+import { Welcome } from './components/Welcome';
+import { Quiz } from './components/Quiz';
+import { Admin } from './components/Admin';
+import { Button } from './components/ui/button';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppContent() {
+  const { quizState, userId, currentRoomId } = useSocket();
+  const [isAdminMode, setIsAdminMode] = useState(false);
 
-  return (
-    <>
+  // Admin mode
+  if (isAdminMode) {
+    return (
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <div className="fixed top-4 right-4 z-50">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsAdminMode(false)}
+          >
+            Switch to User Mode
+          </Button>
+        </div>
+        <Admin />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+    );
+  }
+
+  // Show quiz interface if user has joined
+  if (userId && currentRoomId) {
+    return (
+      <div>
+        <div className="fixed top-4 right-4 z-50">
+          <Button 
+            variant="outline" 
+            onClick={() => setIsAdminMode(true)}
+          >
+            Admin Mode
+          </Button>
+        </div>
+        <Quiz roomId={currentRoomId} />
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+
+  // Show welcome screen
+  return (
+    <div>
+      <div className="fixed top-4 right-4 z-50">
+        <Button 
+          variant="outline" 
+          onClick={() => setIsAdminMode(true)}
+        >
+          Admin Mode
+        </Button>
+      </div>
+      <Welcome />
+    </div>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <SocketProvider>
+      <AppContent />
+    </SocketProvider>
+  );
+}
+
+export default App;

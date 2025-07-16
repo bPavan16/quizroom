@@ -1,12 +1,16 @@
-// BACK in 3 mins
-
 import { Socket } from "socket.io";
 import { QuizManager } from "./QuizManager";
 const ADMIN_PASSWORD = "ADMIN_PASSWORD";
 
 export class UserManager {
+
+    // This class manages user interactions with the quiz system.
+    // It handles user connections, quiz creation, problem submission, and state management.
     private quizManager;
 
+    /* 
+    This constructor initializes the UserManager with a QuizManager instance.
+    */
     constructor() {
         this.quizManager = new QuizManager
     }
@@ -16,25 +20,20 @@ export class UserManager {
     }
 
     private createHandlers(socket: Socket) {
-
         socket.on("join", (data) => {
-
             const userId = this.quizManager.addUser(data.roomId, data.name)
-
             socket.emit("init", {
                 userId,
                 state: this.quizManager.getCurrentState(data.roomId)
             });
-
             socket.join(data.roomId);
         });
 
         socket.on("joinAdmin", (data) => {
-
             if (data.password !== ADMIN_PASSWORD) {
                 return;
             }
-            console.log("join admin called");
+            console.log("join admi called");
 
             socket.on("createQuiz", data => {
                 this.quizManager.addQuiz(data.roomId);

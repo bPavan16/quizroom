@@ -1,10 +1,13 @@
-import { AllowedSubmissions, Quiz } from "../Quiz";
+import { Quiz } from "../Quiz";
+import { AllowedSubmissions } from "../types/types";
 import { IoManager } from "./IoManager";
 let globalProblemId = 0;
 
 export class QuizManager {
+
     private quizes: Quiz[];
 
+    
     constructor() {
         this.quizes = [];
     }
@@ -18,7 +21,6 @@ export class QuizManager {
     }
 
     public addProblem(roomId: string, problem: {
-        
         title: string;
         description: string;
         image?: string;
@@ -29,7 +31,7 @@ export class QuizManager {
         answer: AllowedSubmissions;
     }) {
         const quiz = this.getQuiz(roomId);
-        if(!quiz) {
+        if (!quiz) {
             return;
         }
         quiz.addProblem({
@@ -39,10 +41,10 @@ export class QuizManager {
             submissions: []
         });
     }
-    
+
     public next(roomId: string) {
         const quiz = this.getQuiz(roomId);
-        if(!quiz) {
+        if (!quiz) {
             return;
         }
         quiz.next();
@@ -53,13 +55,13 @@ export class QuizManager {
     }
 
     submit(userId: string, roomId: string, problemId: string, submission: 0 | 1 | 2 | 3) {
-        this.getQuiz(roomId)?.submit(userId, roomId, problemId, submission);   
+        this.getQuiz(roomId)?.submit(userId, roomId, problemId, submission);
     }
-    
+
     getQuiz(roomId: string) {
         return this.quizes.find(x => x.roomId === roomId) ?? null;
     }
-    
+
     getCurrentState(roomId: string) {
         const quiz = this.quizes.find(x => x.roomId === roomId);
         if (!quiz) {
@@ -74,5 +76,5 @@ export class QuizManager {
         }
         const quiz = new Quiz(roomId);
         this.quizes.push(quiz);
-    }   
+    }
 }
