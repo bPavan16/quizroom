@@ -9,5 +9,13 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+    document.addEventListener('copy', (event) => {
+      event.preventDefault();
+      event.clipboardData.setData('text/plain', '');
+      // Prevents copying any content from this page
+    });
+    </script>
+
   </body>
 </html>
