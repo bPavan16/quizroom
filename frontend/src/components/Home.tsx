@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -10,10 +11,12 @@ export const Home = () => {
     const [userName, setUserName] = useState('');
     const [roomId, setRoomId] = useState('');
     const { joinRoom, isConnected } = useSocket();
+    const navigate = useNavigate();
 
     const handleJoinRoom = () => {
         if (userName.trim() && roomId.trim()) {
             joinRoom(roomId.trim(), userName.trim());
+            navigate(`/quiz/${roomId.trim()}`);
         }
     };
 
@@ -44,7 +47,7 @@ export const Home = () => {
                                 <Label htmlFor="join-name">Your Name</Label>
                                 <Input
                                     id="join-name"
-                                    placeholder="Enter your name"
+                                    placeholder="Enter your display name"
                                     value={userName}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
                                 />
@@ -53,9 +56,10 @@ export const Home = () => {
                                 <Label htmlFor="room-id">Room ID</Label>
                                 <Input
                                     id="room-id"
-                                    placeholder="Enter room ID"
+                                    placeholder="Ask your instructor for the room ID"
                                     value={roomId}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRoomId(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && userName.trim() && roomId.trim() && handleJoinRoom()}
                                 />
                             </div>
                             <Button
@@ -63,14 +67,27 @@ export const Home = () => {
                                 className="w-full"
                                 disabled={!userName.trim() || !roomId.trim() || !isConnected}
                             >
-                                Join Quiz
+                                {!isConnected ? 'Connecting...' : 'Join Quiz'}
                             </Button>
                         </TabsContent>
 
                         <TabsContent value="create" className="space-y-4">
                             <div className="space-y-2 flex flex-col items-center p-10">
-                                <Label htmlFor="create-name" className='align-center'>Go To Admin to Create Quiz</Label>
-                    
+                                <div className="text-center space-y-4">
+                                    <h3 className="font-semibold text-lg">Create Your Own Quiz</h3>
+                                    <p className="text-gray-600 text-sm">
+                                        To create and manage quizzes, switch to Admin Mode using the button in the top-right corner.
+                                    </p>
+                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                        <p className="text-blue-800 text-sm">
+                                            <strong>Admin Features:</strong>
+                                            <br />• Create quiz rooms
+                                            <br />• Add questions and answers
+                                            <br />• Control quiz flow
+                                            <br />• Monitor live results
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </TabsContent>
                     </Tabs>

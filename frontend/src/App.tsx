@@ -1,69 +1,90 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { SocketProvider, useSocket } from './contexts/SocketContext';
 import { Home } from './components/Home';
 import { Quiz } from './components/Quiz';
 import { Admin } from './components/Admin';
+import { NotFound } from './components/NotFound';
 import { Button } from './components/ui/button';
 import './App.css';
 
-function AppContent() {
-  const { userId, currentRoomId } = useSocket();
-  const [isAdminMode, setIsAdminMode] = useState(false);
+function Navigation() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { leaveRoom } = useSocket();
 
-  // Admin mode to crreate quizzes and problems
-  if (isAdminMode) {
-    return (
-      <div>
-        <div className="fixed top-4 right-4 z-50">
-          <Button 
-            variant="outline" 
-            onClick={() => setIsAdminMode(false)}
-          >
-            Switch to User Mode
-          </Button>
-        </div>
-        <Admin />
-      </div>
-    );
-  }
+  const isAdminRoute = location.pathname === '/admin';
+  const isQuizRoute = location.pathname.startsWith('/quiz');
 
-  // Show quiz interface if user has joined
-  if (userId && currentRoomId) {
-    return (
-      <div>
-        <div className="fixed top-4 right-4 z-50">
-          <Button 
-            variant="outline" 
-            onClick={() => setIsAdminMode(true)}
-          >
-            Admin Mode
-          </Button>
-        </div>
-        <Quiz roomId={currentRoomId} />
-      </div>
-    );
-  }
+  const handleGoHome = () => {
+    if (isQuizRoute) {
+      leaveRoom();
+    }
+    navigate('/');
+  };
 
-  // Show Home screen
   return (
-    <div>
-      <div className="fixed top-4 right-4 z-50">
+    <div className="fixed top-4 right-4 z-50 flex gap-2">
+      {!isAdminRoute && (
         <Button 
           variant="outline" 
-          onClick={() => setIsAdminMode(true)}
+          onClick={() => navigate('/admin')}
         >
           Admin Mode
         </Button>
-      </div>
-      <Home />
+      )}
+      
+      {isAdminRoute && (
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/')}
+        >
+          Switch to User Mode
+        </Button>
+      )}
+      
+      {(isQuizRoute || isAdminRoute) && (
+        <Button 
+          variant="outline" 
+          onClick={handleGoHome}
+        >
+          Home
+        </Button>
+      )}
     </div>
+  );
+}
+
+function AppContent() {
+  const { userId, currentRoomId } = useSocket();
+
+  return (
+    <>
+      <Navigation />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route 
+          path="/quiz/:roomId" 
+          element={
+            userId && currentRoomId ? (
+              <Quiz />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } 
+        />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 
 function App() {
   return (
     <SocketProvider>
-      <AppContent />
+      <Router>
+        <AppContent />
+      </Router>
     </SocketProvider>
   );
 }

@@ -30,21 +30,56 @@ export class UserManager {
         });
 
         socket.on("joinAdmin", (data) => {
+            console.log("Admin login attempt with password:", data.password);
             if (data.password !== ADMIN_PASSWORD) {
+                console.log("Admin authentication failed");
+                socket.emit("adminAuth", { success: false });
                 return;
             }
-            console.log("join admi called");
+            console.log("Admin authenticated successfully");
+            socket.emit("adminAuth", { success: true });
 
             socket.on("createQuiz", data => {
-                this.quizManager.addQuiz(data.roomId);
-            })
+                try {
+                    this.quizManager.addQuiz(data.roomId);
+                    socket.emit("quizCreated", { roomId: data.roomId });
+                } catch (error) {
+                    socket.emit("error", { message: "Failed to create quiz" });
+                }
+            });
 
             socket.on("createProblem", data => {
-                this.quizManager.addProblem(data.roomId, data.problem);
+                try {
+                    this.quizManager.addProblem(data.roomId, data.problem);
+                    socket.emit("problemAdded", { roomId: data.roomId });
+                } catch (error) {
+                    socket.emit("error", { message: "Failed to add problem" });
+                }
             });
 
             socket.on("next", data => {
-                this.quizManager.next(data.roomId);
+                try {
+                    this.quizManager.next(data.roomId);
+                } catch (error) {
+                    socket.emit("error", { message: "Failed to proceed to next question" });
+                }
+            });
+
+            socket.on("start", data => {
+                try {
+                    this.quizManager.start(data.roomId);
+                } catch (error) {
+                    socket.emit("error", { message: "Failed to start quiz" });
+                }
+            });
+
+            socket.on("getQuizState", data => {
+                try {
+                    const state = this.quizManager.getCurrentState(data.roomId);
+                    socket.emit("quizStateUpdate", state);
+                } catch (error) {
+                    socket.emit("error", { message: "Failed to get quiz state" });
+                }
             });
         });
 

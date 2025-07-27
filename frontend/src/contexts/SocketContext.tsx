@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { QuizState, User, Problem, AllowedSubmissions } from '../types/types';
+import type { User, AllowedSubmissions } from '../types/types';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -10,6 +10,7 @@ interface SocketContextType {
   currentRoomId: string | null;
   isConnected: boolean;
   joinRoom: (roomId: string, userName: string) => void;
+  leaveRoom: () => void;
   submitAnswer: (roomId: string, problemId: string, optionSelected: AllowedSubmissions) => void;
   createRoom: (userName: string) => void;
 }
@@ -24,10 +25,10 @@ export const useSocket = () => {
   return context;
 };
 
-export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [quizState, setQuizState] = useState<any | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [user] = useState<User | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [currentRoomId, setCurrentRoomId] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -92,6 +93,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
+  const leaveRoom = () => {
+    if (socket && currentRoomId) {
+      socket.emit('leave', { roomId: currentRoomId });
+      setCurrentRoomId(null);
+      setUserId(null);
+      setQuizState(null);
+    }
+  };
+
   const submitAnswer = (roomId: string, problemId: string, optionSelected: AllowedSubmissions) => {
     if (socket && userId) {
       socket.emit('submit', {
@@ -113,6 +123,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         currentRoomId,
         isConnected,
         joinRoom,
+        leaveRoom,
         submitAnswer,
         createRoom,
       }}
